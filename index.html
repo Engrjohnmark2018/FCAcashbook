@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FCA Cash Book — a free, simple accounting tool for Farmers' Cooperatives and Associations. Available in English and Ilokano. Developed by Engr. John Mark C. Contillo.">
+  <meta name="author" content="Engr. John Mark C. Contillo">
+  <title>FCA Cash Book — Simple Accounting for Farmers' Cooperatives and Associations</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ======= HEADER ======= -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-emoji">🌾</span>
+        <div class="brand-text">
+          <strong>FCA Cash Book</strong>
+          <small data-i18n="tagline">Simple money records for cooperatives &amp; associations</small>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="book-picker hidden" id="bookPickerWrap">
+          <select id="bookPicker" aria-label="Choose which book to open"></select>
+        </div>
+        <div class="lang-toggle" role="group" aria-label="Language / Pagsasao">
+          <button id="langEn" type="button">EN</button>
+          <button id="langIlo" type="button">ILO</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="app">
+
+    <!-- ======= WELCOME (shown when there are no books yet) ======= -->
+    <section id="view-welcome" class="view hidden">
+      <div class="welcome card">
+        <p class="big-emoji">🌾📒</p>
+        <h2 data-i18n="welcome_h">Welcome to FCA Cash Book</h2>
+        <p data-i18n="welcome_p">A simple book to write down the money of your cooperative or association:</p>
+        <ul class="welcome-list">
+          <li>💰 <strong data-i18n="w_in_l">Money In</strong> — <span data-i18n="w_in_d">sales, membership fees, loans, donations</span></li>
+          <li>🛒 <strong data-i18n="w_out_l">Money Out</strong> — <span data-i18n="w_out_d">seeds, fertilizer, wages, transport</span></li>
+          <li>💵 <strong data-i18n="w_cash_l">Cash on hand</strong> — <span data-i18n="w_cash_d">counted for you, always up to date</span></li>
+        </ul>
+        <p class="sub" data-i18n="welcome_books">First, make one book for your group. You can add more books later for other groups you help.</p>
+        <button class="btn btn-primary big" id="btnCreateFirst" data-i18n="btn_create_first">📗 Create our first book</button>
+      </div>
+    </section>
+
+    <!-- ======= HOME ======= -->
+    <section id="view-home" class="view hidden">
+      <div class="home-head">
+        <h2 id="homeBookName"></h2>
+        <p class="sub" id="homeMonthLine"></p>
+      </div>
+
+      <div class="card cash-card">
+        <span class="card-label" data-i18n="label_cash">💵 Cash on hand</span>
+        <span class="cash-amount" id="homeCash">₱0.00</span>
+        <span class="sub" id="homeOpeningNote"></span>
+      </div>
+
+      <div class="two-cards">
+        <div class="card mini in">
+          <span class="card-label" data-i18n="label_in">💰 Money In</span>
+          <strong id="homeIn">₱0.00</strong>
+        </div>
+        <div class="card mini out">
+          <span class="card-label" data-i18n="label_out">🛒 Money Out</span>
+          <strong id="homeOut">₱0.00</strong>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <button class="btn btn-in big" id="btnIn" data-i18n="btn_in">💰 Record Money In</button>
+        <button class="btn btn-out big" id="btnOut" data-i18n="btn_out">🛒 Record Money Out</button>
+      </div>
+
+      <div class="card empty-card hidden" id="homeEmpty">
+        <p class="big-emoji">📒</p>
+        <p><strong data-i18n="empty_t">No records yet.</strong><br><span data-i18n="empty_p">Use the big buttons above to record your first one.</span></p>
+        <button class="btn btn-ghost" id="btnSample" data-i18n="btn_sample">✨ Load sample records to practice</button>
+      </div>
+    </section>
+
+    <!-- ======= RECORDS ======= -->
+    <section id="view-records" class="view hidden">
+      <h2 data-i18n="h_records">📒 Records</h2>
+      <div class="filters card">
+        <select id="recMonth" aria-label="Filter by month"></select>
+        <input type="search" id="recSearch" data-i18n-ph="search_ph" placeholder="🔍 Search records…">
+      </div>
+      <p class="sub records-summary"><span id="recCount"></span> · <span id="recTotals"></span></p>
+      <ul id="recordsList" class="records-list"></ul>
+    </section>
+
+    <!-- ======= REPORTS ======= -->
+    <section id="view-reports" class="view hidden">
+      <h2 data-i18n="h_reports">📊 Reports</h2>
+      <div class="filters card">
+        <select id="repPeriod" aria-label="Choose report period"></select>
+        <div class="row">
+          <button class="btn btn-ghost" id="btnPrint" data-i18n="btn_print">🖨️ Print</button>
+          <button class="btn btn-ghost" id="btnCSV" data-i18n="btn_csv">⬇️ Excel (CSV)</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 id="repPeriodLabel"></h3>
+        <div class="rep-grid">
+          <div><span class="card-label" data-i18n="rep_in">Money In</span><strong class="tin" id="repIn"></strong></div>
+          <div><span class="card-label" data-i18n="rep_out">Money Out</span><strong class="tout" id="repOut"></strong></div>
+          <div><span class="card-label" data-i18n="rep_net">Net</span><strong id="repNet"></strong><span class="sub" id="repNetNote"></span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 data-i18n="h_cat_in">💰 Money In — where it came from</h3>
+        <div id="repCatIn"></div>
+      </div>
+      <div class="card">
+        <h3 data-i18n="h_cat_out">🛒 Money Out — what it was used for</h3>
+        <div id="repCatOut"></div>
+      </div>
+    </section>
+
+    <!-- ======= SETTINGS ======= -->
+    <section id="view-settings" class="view hidden">
+      <h2 data-i18n="h_settings">⚙️ Settings</h2>
+
+      <div class="card">
+        <h3 data-i18n="s_book_h">📗 This book</h3>
+        <p class="sub" data-i18n="s_book_p">Change the book's name or its starting cash. You can also delete the book from that screen.</p>
+        <button class="btn btn-primary" id="btnBookSettings" data-i18n="btn_book_settings">✏️ Edit book name / starting cash</button>
+      </div>
+
+      <div class="card">
+        <h3 data-i18n="s_backup_h">💾 Backup your records</h3>
+        <p class="sub" data-i18n="s_backup_p">Records are saved only inside this browser on this device. Download a backup regularly so nothing is lost. Use “Restore” to open a backup on another phone or computer.</p>
+        <div class="row">
+          <button class="btn btn-primary" id="btnExportBackup" data-i18n="btn_export">⬇️ Download backup</button>
+          <label class="btn btn-ghost file-btn"><span data-i18n="btn_restore">⬆️ Restore backup</span><input type="file" id="importFile" accept=".json,application/json" hidden></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 data-i18n="s_about_h">ℹ️ About</h3>
+        <p class="sub" data-i18n="s_about_p">FCA Cash Book is a free, simple cash book for Farmers' Cooperatives and Associations. It works offline, needs no account, and keeps all records private on your own device.</p>
+        <p class="sub"><strong data-i18n="s_dev">Developed by:</strong> ENGR. JOHN MARK C. CONTILLO</p>
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      🌾 FCA Cash Book<br>
+      <span data-i18n="footer_dev">Developed by</span> <strong>ENGR. JOHN MARK C. CONTILLO</strong>
+    </footer>
+
+  </main>
+
+  <!-- ======= BOTTOM NAVIGATION ======= -->
+  <nav class="tabbar" aria-label="Main menu">
+    <button data-view="home"><span class="tab-emoji">🏠</span><span data-i18n="tab_home">Home</span></button>
+    <button data-view="records"><span class="tab-emoji">📒</span><span data-i18n="tab_records">Records</span></button>
+    <button data-view="reports"><span class="tab-emoji">📊</span><span data-i18n="tab_reports">Reports</span></button>
+    <button data-view="settings"><span class="tab-emoji">⚙️</span><span data-i18n="tab_settings">Settings</span></button>
+  </nav>
+
+  <!-- ======= PANEL: RECORD / EDIT AN ENTRY ======= -->
+  <div id="entryPanel" class="panel hidden">
+    <div class="panel-header">
+      <button class="btn btn-ghost" id="entryCancel" type="button" data-i18n="back">← Back</button>
+      <h2 id="entryTitle">Record Money In</h2>
+      <span class="spacer"></span>
+    </div>
+    <form id="entryForm" class="big-form card">
+      <div class="type-toggle">
+        <button type="button" id="typeIn" class="type-btn in">💰 Money In</button>
+        <button type="button" id="typeOut" class="type-btn out">🛒 Money Out</button>
+      </div>
+
+      <label><span data-i18n="date_l">Date</span>
+        <input type="date" id="fDate" required>
+      </label>
+
+      <label><span data-i18n="amount_l">Amount (₱)</span>
+        <input type="number" id="fAmount" inputmode="decimal" step="0.01" min="0.01" required data-i18n-ph="amount_ph" placeholder="Example: 1500.00">
+      </label>
+
+      <label><span id="catLabelText">Where did the money come from?</span>
+        <select id="fCategory"></select>
+      </label>
+
+      <label><span id="personLabelText">From (who paid)</span>
+        <input type="text" id="fPerson" data-i18n-ph="person_ph" placeholder="Example: Maria's farm">
+      </label>
+
+      <label><span data-i18n="ref_l">Receipt / reference number (optional)</span>
+        <input type="text" id="fRef" data-i18n-ph="ref_ph" placeholder="Example: OR #0012">
+      </label>
+
+      <label><span data-i18n="note_l">Notes (optional)</span>
+        <textarea id="fNote" rows="2" data-i18n-ph="note_ph" placeholder="Example: cabbage, 250 kg"></textarea>
+      </label>
+
+      <button type="submit" class="btn big btn-in" id="entrySave">💾 Save</button>
+    </form>
+  </div>
+
+  <!-- ======= PANEL: CREATE / EDIT A BOOK ======= -->
+  <div id="bookPanel" class="panel hidden">
+    <div class="panel-header">
+      <button class="btn btn-ghost" id="bookCancel" type="button" data-i18n="back">← Back</button>
+      <h2 id="bookPanelTitle">Create a new book</h2>
+      <span class="spacer"></span>
+    </div>
+    <form id="bookForm" class="big-form card">
+      <label><span data-i18n="bName_l">Name of cooperative / association</span>
+        <input type="text" id="bName" required data-i18n-ph="bName_ph" placeholder="Example: Samili Farmers Cooperative">
+        <span class="sub" id="bNameHint"></span>
+      </label>
+
+      <label><span data-i18n="bOpening_l">Cash on hand at start (₱)</span>
+        <input type="number" id="bOpening" inputmode="decimal" step="0.01" min="0" value="0">
+        <span class="sub" data-i18n="bOpening_p">If the group already has cash today, write it here. If none, leave it as 0.</span>
+      </label>
+
+      <button type="submit" class="btn btn-primary big" id="bookSave">✅ Create book</button>
+
+      <div id="bookDeleteWrap" class="hidden danger-zone">
+        <hr>
+        <button type="button" class="btn btn-danger" id="bookDelete" data-i18n="bookDelete">🗑️ Delete this book and all its records</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ======= PRINT AREA (visible only when printing) ======= -->
+  <div id="printArea" aria-hidden="true"></div>
+
+  <!-- ======= TOAST MESSAGE ======= -->
+  <div id="toast" role="status"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
